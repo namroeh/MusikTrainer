@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Intervall-Trainer</title>
+    <meta name="description" content="Intervalle lernen mit Merkliedern – funktioniert offline." />
+    <meta name="theme-color" content="#f4efe6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16161a" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Intervalle" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="top">
+        <h1 class="title">Intervall-Trainer</h1>
+        <div class="switches">
+          <button type="button" class="switch" id="toggle-symbols" role="switch" aria-checked="true">
+            <span class="switch-label">Symbole</span><span class="switch-track" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="switch" id="toggle-titles" role="switch" aria-checked="true">
+            <span class="switch-label">Liedtitel</span><span class="switch-track" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="modes" id="modes" role="radiogroup" aria-label="Wiedergabe"></div>
+
+      <div class="roots" id="roots" role="radiogroup" aria-label="Grundton"></div>
+
+      <div class="keyboard-scroll" id="keyboard-scroll">
+        <div class="keyboard" id="keyboard"></div>
+      </div>
+
+      <section class="info" aria-live="polite">
+        <div class="info-card" id="info-card">
+          <div class="info-symbol" id="info-symbol" aria-hidden="true"></div>
+          <div class="info-body">
+            <p class="info-head"><span class="info-short" id="info-short"></span> <span class="info-name" id="info-name"></span></p>
+            <p class="info-notes" id="info-notes"></p>
+            <p class="info-song" id="info-song"></p>
+          </div>
+          <button type="button" class="again" id="again" disabled>Nochmal</button>
+        </div>
+        <p class="status" id="status"></p>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
