@@ -12,6 +12,8 @@
  *   der Ton auch bei eingeschaltetem Stummschalter zu hören ist.
  * - Ältere iOS-Versionen ohne diese Schnittstelle: Ein im Speicher erzeugtes, stummes
  *   HTML-Audio-Element (keine Datei) schaltet auf die Medien-Wiedergabe um.
+ * - Nach dem Hintergrund (App-Wechsel, Sperrbildschirm) wird der AudioContext bei der
+ *   nächsten Berührung neu erzeugt, weil iOS den alten oft stumm lässt.
  */
 
 import { frequencyFromMidi } from './pitch';
@@ -53,12 +55,46 @@ export class AudioEngine {
   private master: GainNode | null = null;
   private readonly voices = new Set<Voice>();
   private silentAudio: HTMLAudioElement | null = null;
+  /** true, sobald die App im Hintergrund war → AudioContext wird neu aufgebaut */
+  private stale = false;
+
+  constructor() {
+    // iOS: Ein AudioContext, der im Hintergrund war, lässt sich oft nicht zuverlässig
+    // wecken (bleibt „interrupted" oder meldet „running", ist aber stumm; offene
+    // WebKit-Fehler 263627, 273511, 291892). Deshalb: beim Verlassen pausieren und
+    // bei der nächsten Berührung einen frischen AudioContext erzeugen.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.goneToBackground();
+    });
+    window.addEventListener('pagehide', () => this.goneToBackground());
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) this.stale = true; // aus dem Seiten-Cache zurück
+    });
+  }
+
+  private goneToBackground(): void {
+    this.silentAudio?.pause();
+    if (!this.ctx) return;
+    this.stale = true;
+    this.ctx.suspend().catch(() => undefined);
+  }
+
+  /** Alten AudioContext schließen (iOS erlaubt nur wenige gleichzeitig). */
+  private discardContext(): void {
+    const old = this.ctx;
+    this.ctx = null;
+    this.master = null;
+    this.voices.clear();
+    this.stale = false;
+    old?.close().catch(() => undefined);
+  }
 
   /**
    * Startet bzw. weckt den AudioContext. Muss aus einem Berührungs-, Klick- oder
    * Tastatur-Ereignis heraus aufgerufen werden (Vorgabe von iOS und Chrome).
    */
   unlock(): void {
+    if (this.ctx && (this.stale || this.ctx.state === 'closed')) this.discardContext();
     if (!this.ctx) {
       setPlaybackAudioSession();
       const Ctor =
@@ -87,9 +123,6 @@ export class AudioEngine {
 
       this.ctx = ctx;
       this.master = master;
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) this.silentAudio?.pause();
-      });
     }
     if (this.ctx.state !== 'running') {
       this.ctx.resume().catch(() => undefined);

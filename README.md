@@ -127,13 +127,14 @@ npx playwright install chromium   # einmalig
 npm run test:e2e
 ```
 
-**Abnahmetests im Browser (Playwright/Chromium, 33 Tests in 3 Bildschirmgrößen):**
+**Abnahmetests im Browser (Playwright/Chromium, 39 Tests in 3 Bildschirmgrößen):**
 
 - Alle 13 Grundtöne × 13 Tasten × 3 Wiedergabearten = **507 Fälle** je Bildschirmgröße. Geprüft werden die tatsächlich geplanten Frequenzen und ihre Reihenfolge, die Anzeige (Kürzel, Name, Tonnamen, Liedtitel), das Aufleuchten von Grund- und Zieltaste und welches Symbol auf welcher Taste sitzt.
 - Die festen Prüffälle in der Anzeige
 - Abgedunkelte Tasten spielen ihren Einzelton
 - „Nochmal", die Schalter, das Speichern der Auswahl und der Standard beim ersten Start
 - Tastenbreite mindestens 44 px; der Grundton-Bereich ist nach der Auswahl sichtbar
+- Nach dem Hintergrund (App-Wechsel) wird ein frischer AudioContext erzeugt, alte werden geschlossen und häufen sich nicht an
 - **Offline-Start** nach dem ersten Besuch, Vollständigkeit des Manifests, **keine Anfragen an fremde Server**
 
 ## 6. Lieder und Symbole ändern
@@ -151,6 +152,8 @@ Tipp für eigene Symbole: Inhalt innerhalb eines Kreises mit Radius ~20 um die M
 **Start des Tons:** Der AudioContext wird erst bei der ersten Berührung erzeugt bzw. fortgesetzt (Vorgabe von iOS und Chrome).
 
 **Stummschalter am iPhone:** iOS behandelt Web-Audio standardmäßig wie Umgebungston. Bei eingeschaltetem Stummschalter wäre es also still. Die App setzt deshalb `navigator.audioSession.type = "playback"` (Safari ab iOS 17). Damit sollte der Ton auch bei Stummschaltung zu hören sein, laut Lautstärkeregler. Auf älteren iOS-Versionen ohne diese Schnittstelle startet die App ein stummes, im Speicher erzeugtes Audio-Element (keine Datei), das auf Medien-Wiedergabe umschaltet. Nebenwirkung von „playback": Läuft gerade Musik in einer anderen App, wird sie beim Abspielen eines Intervalls pausiert.
+
+**Nach dem Hintergrund (App-Wechsel, Sperrbildschirm):** iOS lässt eine Web-Audio-Ausgabe, die im Hintergrund war, oft stumm. Sie bleibt im Zustand „interrupted" oder meldet „running" und gibt trotzdem nichts aus (offene WebKit-Fehler [263627](https://bugs.webkit.org/show_bug.cgi?id=263627), [273511](https://bugs.webkit.org/show_bug.cgi?id=273511), [291892](https://bugs.webkit.org/show_bug.cgi?id=291892)). Die App pausiert deshalb die Ausgabe beim Verlassen und baut sie bei der nächsten Berührung komplett neu auf, statt die alte zu wecken. *Am iPhone beobachtet (Version 1.0.0): nach dem Hintergrund stumm, erst nach Neustart der App wieder Ton. Ab Version 1.0.1 behoben, Bestätigung am Gerät ausständig.*
 
 > ⚠️ **Noch nicht auf echten Geräten getestet.** Die App wurde in einer Cloud-Umgebung mit Chromium entwickelt und getestet. Ein iPhone oder Android-Handy stand nicht zur Verfügung. Bitte prüfe die folgenden Punkte und trag das Ergebnis hier ein:
 
