@@ -7,11 +7,11 @@
  */
 export const ABOUT = {
   /** Medieninhaber: Vor- und Nachname */
-  owner: '[Name eintragen]',
+  owner: 'Helmut Hörmann',
   /** Wohnort (Ort genügt) */
-  place: '[Wohnort eintragen]',
+  place: 'Austria',
   /** Kontakt für Datenschutzfragen, z. B. E-Mail-Adresse */
-  contact: '[Kontakt eintragen]',
+  contact: 'namroeh@gmail.com',
   /** Wo die App gehostet wird */
   hosting: {
     name: 'GitHub Pages',
