@@ -158,7 +158,7 @@ npm run test:e2e
 Oben auf **Quiz** wechseln, dann **Start**.
 
 - **Grundton:** fest (der gewählte, wie im Lernen-Bereich) oder **zufällig**. Bei „fest" ist es derselbe Grundton wie im Lernen-Bereich: Änderst du ihn an einer Stelle, ändert er sich auch an der anderen.
-- **Antwort:** per **Taste** (Zieltaste antippen, der Grundton leuchtet) oder aus der **Liste** (r1 … r8).
+- **Antwort:** per **Taste** (Zieltaste antippen, der Grundton leuchtet) oder aus der **Liste** (beschriftet mit dem vollen Namen, z. B. „kleine Terz“).
 - Die **Wiedergabeart** (nacheinander / abwärts / gleichzeitig) gilt auch im Quiz.
 - **Auflösen** zeigt die Lösung, zählt aber als falsch.
 - Nach der Antwort siehst du, ob sie richtig oder falsch war, und die Auflösung mit Name, Tonnamen, Merklied und Symbol. Die richtige Taste leuchtet, eine falsch angetippte wird rot. Danach kannst du Tasten oder Listeneinträge antippen, um Intervalle zu vergleichen. Das zählt nicht mehr als Antwort.

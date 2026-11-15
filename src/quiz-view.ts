@@ -109,9 +109,10 @@ export class QuizController {
         b.type = 'button';
         b.className = 'qchip';
         b.dataset.semitones = String(i.semitones);
-        b.textContent = i.short;
-        b.setAttribute('aria-label', i.name);
-        b.title = i.name;
+        // voller Name als Beschriftung, z. B. „kleine Terz" (Zusatz in Klammern weglassen)
+        b.textContent = i.name.replace(/\s*\(.*\)\s*$/, '');
+        b.setAttribute('aria-label', `${i.name} (${i.short})`);
+        b.title = `${i.short} – ${i.name}`;
         b.addEventListener('click', () => this.onListChoice(i.semitones));
         return b;
       }),
@@ -304,7 +305,7 @@ export class QuizController {
     el.status.className = 'quiz-status';
     el.replay.disabled = !this.question;
     const trouble = troubleIntervals(this.stats);
-    el.forget.hidden = trouble.length === 0 || this.phase === 'asking';
+    el.forget.hidden = trouble.length === 0 || this.phase !== 'idle';
 
     if (this.phase === 'idle' || !this.question) {
       el.result.hidden = true;
@@ -339,12 +340,17 @@ export class QuizController {
     el.name.textContent = interval.name;
     el.notes.textContent = intervalNames(root, interval).text;
     el.song.textContent = `„${interval.song}“`;
-    let hint = '';
-    if (!correct && this.given !== null) {
-      const g = intervalBySemitones(this.given)!;
-      hint = `Deine Antwort: ${g.short} (${g.name}). `;
+    if (mode === 'list') {
+      // die Liste zeigt die eigene (rot) und die richtige Antwort (grün) schon an
+      el.hint.textContent = 'Zum Vergleichen Liste oder Tasten antippen.';
+    } else {
+      let hint = '';
+      if (!correct && this.given !== null) {
+        const g = intervalBySemitones(this.given)!;
+        hint = `Deine Antwort: ${g.short} (${g.name}). `;
+      }
+      el.hint.textContent = `${hint}Tipp: zum Vergleichen Tasten antippen.`;
     }
-    el.hint.textContent = `${hint}Tipp: zum Vergleichen Tasten${mode === 'list' ? ' oder Liste' : ''} antippen.`;
     el.next.textContent = 'Weiter';
   }
 }
