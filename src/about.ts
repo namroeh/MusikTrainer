@@ -9,7 +9,7 @@ export const ABOUT = {
   /** Medieninhaber: Vor- und Nachname */
   owner: 'Helmut Hörmann',
   /** Wohnort (Ort genügt) */
-  place: 'Austria',
+  place: '3902 Vitis, Austria',
   /** Kontakt für Datenschutzfragen, z. B. E-Mail-Adresse */
   contact: 'namroeh@gmail.com',
   /** Wo die App gehostet wird */
