@@ -1,7 +1,9 @@
 import './style.css';
 import { registerSW } from 'virtual:pwa-register';
+import { setupAbout } from './about-view';
 import { AudioEngine } from './audio';
 import { INTERVALS, intervalBySemitones } from './intervals';
+import { setupInstallBanner } from './install';
 import { Keyboard, type KeyState } from './keyboard';
 import { ROOTS, findRoot, intervalNames, keyLabel, type RootNote } from './notes';
 import { KEYBOARD_LOW_MIDI } from './pitch';
@@ -255,6 +257,8 @@ function relayout(smooth = false): void {
   keyboard.scrollToRange(rootMidi(), rootMidi() + 12, smooth);
 }
 relayout();
+setupAbout();
+setupInstallBanner(app, () => relayout());
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);

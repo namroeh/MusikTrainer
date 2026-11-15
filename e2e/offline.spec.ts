@@ -2,10 +2,9 @@ import { expect, test } from '@playwright/test';
 
 test('App startet nach dem ersten Besuch ohne Netz (Service Worker)', async ({ page, context }) => {
   await page.goto('/');
-  await page.waitForFunction(async () => {
-    const reg = await navigator.serviceWorker.ready;
-    return !!reg.active && !!navigator.serviceWorker.controller;
-  }, undefined, { timeout: 30_000 });
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  // Service Worker übernimmt schon die erste Seite (clientsClaim)
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller, undefined, { timeout: 30_000 });
 
   await context.setOffline(true);
   await page.reload();

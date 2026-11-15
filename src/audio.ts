@@ -17,6 +17,7 @@
  */
 
 import { frequencyFromMidi } from './pitch';
+import { isIOS } from './platform';
 import type { ScheduledNote } from './playback';
 
 /** Ereignis, das bei jeder Wiedergabe ausgelöst wird (für die automatischen Tests). */
@@ -256,13 +257,6 @@ function setPlaybackAudioSession(): void {
   } catch {
     /* nicht unterstützt */
   }
-}
-
-function isIOS(): boolean {
-  return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  );
 }
 
 function needsSilentAudioFallback(): boolean {

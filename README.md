@@ -9,6 +9,9 @@ Eine kleine Handy-App zum Lernen der Intervalle mit Merkliedern. Sie läuft komp
 - Anzeige: Kürzel, voller Name, richtig buchstabierte Tonnamen (z. B. „D – Fis", „Des – Eses (D)") und Liedtitel
 - **Nochmal**-Knopf, Schalter **Symbole** und **Liedtitel** zum Selbst-Abfragen
 - Hoch- und Querformat, helles und dunkles Design (folgt der Systemeinstellung)
+- Info-Fenster (ⓘ) mit Installationsanleitung, Offenlegung und Datenschutz; Installationshinweis im Browser
+
+**Online:** <https://namroeh.github.io/MusikTrainer/> – am Handy öffnen und „Zum Home-Bildschirm" bzw. „App installieren". Danach läuft die App offline.
 
 ---
 
@@ -30,7 +33,7 @@ npm run dev
 - Am Rechner: <http://localhost:5173>
 - Am Handy im selben WLAN: die Adresse hinter „Network:" aus der Terminal-Ausgabe, z. B. `http://192.168.1.20:5173`
 
-> Auf diesem Weg kannst du die App am Handy **ansehen und ausprobieren**, aber **nicht installieren**: Über eine einfache `http://`-Adresse lassen Handys keinen Offline-Betrieb (Service Worker) zu. Zum Installieren nimm Abschnitt 4.
+> Auf diesem Weg kannst du die App am Handy **ansehen und ausprobieren**, aber **nicht installieren**: Über eine einfache `http://`-Adresse lassen Handys keinen Offline-Betrieb (Service Worker) zu. Zum Installieren nimm die veröffentlichte Version (Abschnitt 4) oder den lokalen Weg (Abschnitt 5).
 
 ## 3. Bauen
 
@@ -40,7 +43,21 @@ npm run build
 
 Ergebnis im Ordner `dist/`. Testweise ansehen mit `npm run preview`.
 
-## 4. Aufs Handy installieren – lokal, ohne Internet
+## 4. Veröffentlichen auf GitHub Pages (für alle)
+
+Jeder Push auf den Branch `main` startet automatisch den Workflow `.github/workflows/pages.yml`:
+
+1. Unit-Tests und Abnahmetests laufen. Schlägt einer fehl, wird **nicht** veröffentlicht.
+2. Die App wird für den Unterordner `/<Repository-Name>/` gebaut.
+3. Das Ergebnis geht auf GitHub Pages: <https://namroeh.github.io/MusikTrainer/>
+
+**Einmalig einrichten:** Im Repository *Settings → Pages → Build and deployment → Source:* **GitHub Actions** wählen.
+
+**Vor der ersten Veröffentlichung:** In `src/about.ts` Name, Wohnort und Kontakt für Offenlegung und Datenschutzhinweis eintragen. Solange dort Platzhalter stehen, bricht der Workflow absichtlich ab.
+
+Den Fortschritt siehst du im Repository unter **Actions**. Installierte Apps holen sich neue Versionen automatisch, sobald sie mit Internet geöffnet werden.
+
+## 5. Aufs Handy installieren – lokal, ohne Internet
 
 Ein Handy installiert eine Web-App nur, wenn sie über **HTTPS** kommt. Dafür bringt das Projekt einen kleinen Server mit, der eine **eigene, private Zertifizierungsstelle** anlegt. Es ist kein Internet und kein Konto irgendwo nötig. Handy und Rechner müssen nur im selben WLAN sein.
 
@@ -92,13 +109,7 @@ Windows fragt beim ersten Start eventuell nach einer Firewall-Freigabe für Node
 - **Android:** Eine lokale HTML-Datei lässt sich teilweise öffnen. Installation, Offline-Betrieb und das Speichern der Einstellungen funktionieren so aber nicht zuverlässig.
 - Der Weg über `npm run handy` ist einmalig etwas Arbeit (rund 10 Minuten). Danach liegt die App wirklich lokal am Handy.
 
-### Alternative: Hosting mit HTTPS
-
-Wenn dir das Zertifikat zu umständlich ist: Lade den Inhalt von `dist/` auf einen beliebigen HTTPS-Webspace (z. B. GitHub Pages, Netlify, Cloudflare Pages), öffne ihn einmal am Handy und installiere ihn. Danach läuft die App ebenfalls offline. Liegt die App dort in einem Unterordner (z. B. `https://name.github.io/intervall-trainer/`), baue mit `npx vite build --base=/intervall-trainer/` und passe in `vite.config.ts` bei `manifest` die Werte `id`, `start_url` und `scope` auf denselben Pfad an.
-
----
-
-## 5. Tests
+## 6. Tests
 
 ```bash
 npm test
@@ -127,23 +138,25 @@ npx playwright install chromium   # einmalig
 npm run test:e2e
 ```
 
-**Abnahmetests im Browser (Playwright/Chromium, 39 Tests in 3 Bildschirmgrößen):**
+**Abnahmetests im Browser (Playwright/Chromium, 3 Bildschirmgrößen):**
 
 - Alle 13 Grundtöne × 13 Tasten × 3 Wiedergabearten = **507 Fälle** je Bildschirmgröße. Geprüft werden die tatsächlich geplanten Frequenzen und ihre Reihenfolge, die Anzeige (Kürzel, Name, Tonnamen, Liedtitel), das Aufleuchten von Grund- und Zieltaste und welches Symbol auf welcher Taste sitzt.
 - Die festen Prüffälle in der Anzeige
 - Abgedunkelte Tasten spielen ihren Einzelton
 - „Nochmal", die Schalter, das Speichern der Auswahl und der Standard beim ersten Start
 - Tastenbreite mindestens 44 px; der Grundton-Bereich ist nach der Auswahl sichtbar
+- Installationshinweis (iPhone) und „Installieren"-Knopf (Android), Info-Fenster
+- Build im Unterordner wie auf GitHub Pages: Pfade, Manifest, Offline-Start
 - Nach dem Hintergrund (App-Wechsel) wird ein frischer AudioContext erzeugt, alte werden geschlossen und häufen sich nicht an
 - **Offline-Start** nach dem ersten Besuch, Vollständigkeit des Manifests, **keine Anfragen an fremde Server**
 
-## 6. Lieder und Symbole ändern
+## 7. Lieder und Symbole ändern
 
 Alles steht in **`src/intervals.ts`**: Liedtitel (`song`), Symbolbeschreibung (`symbolName`) und das Symbol selbst (`symbol`, als SVG-Code mit Zeichenfläche 48 × 48). `semitones` und `degree` bitte nicht ändern, davon hängen Klang und Tonnamen ab. Nach einer Änderung `npm test` laufen lassen.
 
 Tipp für eigene Symbole: Inhalt innerhalb eines Kreises mit Radius ~20 um die Mitte halten. Die App legt jedes Symbol auf ein helles, rundes Plättchen mit dunklem Rand, damit es auf weißen **und** schwarzen Tasten gut lesbar ist.
 
-## 7. Ton, iOS und der Stummschalter
+## 8. Ton, iOS und der Stummschalter
 
 **Klang:** Dreieck- und Sinuswelle mit leisen Obertönen und einem Tiefpass, der sich nach dem Anschlag schließt, damit es klavierähnlich klingt. Die Lautstärke steigt in 8 ms von 0 an, klingt ab und läuft beim Loslassen weich auf 0 aus. Beim Antippen einer neuen Taste wird ein noch laufender Ton in rund 50 ms ausgeblendet. Ein Kompressor verhindert Übersteuern bei „gleichzeitig".
 
@@ -169,7 +182,7 @@ Tipp für eigene Symbole: Inhalt innerhalb eines Kreises mit Radius ~20 um die M
 
 Falls am iPhone bei Stummschaltung nichts zu hören ist: iOS-Version notieren und mir Bescheid geben. Dann bauen wir den Ausweichweg für ältere Versionen um.
 
-## 8. Projektstruktur
+## 9. Projektstruktur
 
 ```
 src/
@@ -180,6 +193,10 @@ src/
   audio.ts       ← Klangerzeugung (Web Audio), iOS-Freischaltung und -Stummschalter
   keyboard.ts    ← Tastatur: Aufbau, Größe, Scrollen, Hervorhebung
   settings.ts    ← gespeicherte Auswahl (localStorage)
+  about.ts       ← Angaben für Offenlegung und Datenschutz (vor dem Veröffentlichen ausfüllen)
+  about-view.ts  ← Info-Fenster
+  install.ts     ← Installationshinweis / „Installieren"-Knopf
+  platform.ts    ← Plattform-Erkennung (iOS, installiert?)
   main.ts        ← verbindet alles
   style.css
 tests/           ← Unit-Tests (Vitest)
@@ -188,6 +205,7 @@ scripts/
   handy.mjs      ← lokaler HTTPS-Server fürs Handy (npm run handy)
   icons.mjs      ← erzeugt die App-Icons aus scripts/icon-src/ (npm run icons)
 public/icons/    ← App-Icons
+.github/workflows/pages.yml ← automatische Tests + Veröffentlichung
 ```
 
 **Technik:** Vite + TypeScript, ohne UI-Framework. Die App hat eine einzige Ansicht mit wenig Zustand, ein Framework wäre da nur Ballast. So bleibt das Programm klein (≈ 12 kB JavaScript, komprimiert) und startet sofort. `vite-plugin-pwa` erzeugt beim Build das Manifest und den Service Worker, der alle Dateien vorab speichert.
@@ -196,7 +214,7 @@ public/icons/    ← App-Icons
 
 **Stimmung:** gleichstufig, c' = 261,63 Hz, Frequenz = 261,63 × 2^(Halbtöne über c' / 12). Der Grundton liegt immer zwischen c' und h', seine Oktave entsprechend zwischen c'' und h''.
 
-## 9. Bekannte Grenzen
+## 10. Bekannte Grenzen
 
 - Sehr schmale Handys (320 px, z. B. iPhone SE der 1. Generation): Weil jede Taste mindestens 44 px breit ist, passt eine ganze Oktave nicht ganz auf den Schirm. Die Tastatur lässt sich wischen.
 - Die automatischen Tests laufen in Chromium. WebKit (Safari) war in der Entwicklungsumgebung nicht verfügbar, siehe Checkliste oben.

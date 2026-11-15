@@ -17,8 +17,17 @@
   </head>
   <body>
     <div class="app" id="app">
+      <div class="install-banner" id="install-banner" role="note" hidden>
+        <p class="install-text" id="install-text"></p>
+        <button type="button" class="install-action" id="install-action" hidden>Installieren</button>
+        <button type="button" class="install-close" id="install-close" aria-label="Hinweis schließen">×</button>
+      </div>
+
       <header class="top">
-        <h1 class="title">Intervall-Trainer</h1>
+        <div class="brand">
+          <h1 class="title">Intervall-Trainer</h1>
+          <button type="button" class="info-btn" id="info-open" aria-label="Info und Installation" aria-haspopup="dialog">i</button>
+        </div>
         <div class="switches">
           <button type="button" class="switch" id="toggle-symbols" role="switch" aria-checked="true">
             <span class="switch-label">Symbole</span><span class="switch-track" aria-hidden="true"></span>
@@ -50,6 +59,14 @@
         <p class="status" id="status"></p>
       </section>
     </div>
+
+    <dialog class="about" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <h2 id="about-title">Intervall-Trainer</h2>
+        <button type="button" class="about-close" id="about-close" aria-label="Schließen">×</button>
+      </div>
+      <div class="about-content" id="about-content"></div>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
