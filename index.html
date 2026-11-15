@@ -16,37 +16,55 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   </head>
   <body>
-    <div class="app" id="app">
+    <div class="app tab-learn" id="app">
       <div class="install-banner" id="install-banner" role="note" hidden>
         <p class="install-text" id="install-text"></p>
         <button type="button" class="install-action" id="install-action" hidden>Installieren</button>
         <button type="button" class="install-close" id="install-close" aria-label="Hinweis schließen">×</button>
       </div>
 
-      <header class="top">
-        <div class="brand">
-          <h1 class="title">Intervall-Trainer</h1>
-          <button type="button" class="info-btn" id="info-open" aria-label="Info und Installation" aria-haspopup="dialog">i</button>
-        </div>
-        <div class="switches">
-          <button type="button" class="switch" id="toggle-symbols" role="switch" aria-checked="true">
-            <span class="switch-label">Symbole</span><span class="switch-track" aria-hidden="true"></span>
-          </button>
-          <button type="button" class="switch" id="toggle-titles" role="switch" aria-checked="true">
-            <span class="switch-label">Liedtitel</span><span class="switch-track" aria-hidden="true"></span>
-          </button>
-        </div>
-      </header>
+      <div class="bar">
+        <header class="top">
+          <div class="brand">
+            <h1 class="visually-hidden">Intervall-Trainer</h1>
+            <div class="tabs" id="tabs" role="radiogroup" aria-label="Bereich">
+              <button type="button" class="tab" role="radio" data-tab="learn">Lernen</button>
+              <button type="button" class="tab" role="radio" data-tab="quiz">Quiz</button>
+            </div>
+            <button type="button" class="info-btn" id="info-open" aria-label="Info und Installation" aria-haspopup="dialog">i</button>
+          </div>
+          <div class="switches">
+            <button type="button" class="switch" id="toggle-symbols" role="switch" aria-checked="true">
+              <span class="switch-label">Symbole</span><span class="switch-track" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="switch learn-only" id="toggle-titles" role="switch" aria-checked="true">
+              <span class="switch-label">Liedtitel</span><span class="switch-track" aria-hidden="true"></span>
+            </button>
+          </div>
+        </header>
+        <div class="modes" id="modes" role="radiogroup" aria-label="Wiedergabe"></div>
+      </div>
 
-      <div class="modes" id="modes" role="radiogroup" aria-label="Wiedergabe"></div>
+      <div class="roots learn-only" id="roots" role="radiogroup" aria-label="Grundton"></div>
 
-      <div class="roots" id="roots" role="radiogroup" aria-label="Grundton"></div>
+      <div class="quiz-settings quiz-only">
+        <label class="quiz-field">
+          <span>Grundton</span>
+          <select id="quiz-root" aria-label="Grundton im Quiz"></select>
+        </label>
+        <div class="answer-modes" id="quiz-answer" role="radiogroup" aria-label="Antwort">
+          <button type="button" class="answer-mode" role="radio" data-answer="key" title="Antwort: Zieltaste antippen">Taste</button>
+          <button type="button" class="answer-mode" role="radio" data-answer="list" title="Antwort: Intervall aus der Liste wählen">Liste</button>
+        </div>
+      </div>
 
       <div class="keyboard-scroll" id="keyboard-scroll">
         <div class="keyboard" id="keyboard"></div>
       </div>
 
-      <section class="info" aria-live="polite">
+      <div class="quiz-list quiz-only" id="quiz-list" role="group" aria-label="Intervall auswählen"></div>
+
+      <section class="info learn-only" aria-live="polite">
         <div class="info-card" id="info-card">
           <div class="info-symbol" id="info-symbol" aria-hidden="true"></div>
           <div class="info-body">
@@ -57,6 +75,30 @@
           <button type="button" class="again" id="again" disabled>Nochmal</button>
         </div>
         <p class="status" id="status"></p>
+      </section>
+
+      <section class="quiz-panel quiz-only" aria-live="polite">
+        <div class="quiz-card">
+          <p class="quiz-status" id="quiz-status"></p>
+          <p class="quiz-score">
+            <span id="quiz-score"></span>
+            <button type="button" class="quiz-reset" id="quiz-reset" aria-label="Zähler zurücksetzen" title="Zähler zurücksetzen">↺</button>
+          </p>
+          <div class="quiz-result" id="quiz-result" hidden>
+            <div class="info-symbol quiz-symbol" id="quiz-symbol" aria-hidden="true"></div>
+            <div class="info-body">
+              <p class="info-head"><span class="info-short" id="quiz-short"></span> <span class="info-name" id="quiz-name"></span></p>
+              <p class="info-notes" id="quiz-notes"></p>
+              <p class="info-song quiz-song" id="quiz-song"></p>
+            </div>
+          </div>
+          <p class="quiz-hint" id="quiz-hint"></p>
+          <div class="quiz-actions">
+            <button type="button" class="secondary" id="quiz-replay">Nochmal hören</button>
+            <button type="button" class="again" id="quiz-next">Start</button>
+          </div>
+          <button type="button" class="quiz-forget" id="quiz-forget" hidden>Lernstand zurücksetzen</button>
+        </div>
       </section>
     </div>
 

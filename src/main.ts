@@ -8,7 +8,8 @@ import { Keyboard, type KeyState } from './keyboard';
 import { ROOTS, findRoot, intervalNames, keyLabel, type RootNote } from './notes';
 import { KEYBOARD_LOW_MIDI } from './pitch';
 import { PLAY_MODES, planInterval, planSingle, type PlayMode } from './playback';
-import { loadSettings, saveSettings } from './settings';
+import { QuizController } from './quiz-view';
+import { loadSettings, saveSettings, type Tab } from './settings';
 
 // ---------- Zustand ----------
 
@@ -22,6 +23,7 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 const app = $('app');
 const modesEl = $('modes');
 const rootsEl = $('roots');
+const tabsEl = $('tabs');
 const againBtn = $<HTMLButtonElement>('again');
 const symbolsSwitch = $<HTMLButtonElement>('toggle-symbols');
 const titlesSwitch = $<HTMLButtonElement>('toggle-titles');
@@ -44,6 +46,15 @@ function rootMidi(): number {
   return KEYBOARD_LOW_MIDI + currentRoot().pitchClass;
 }
 
+/** Grundton, um den die Tastatur gerade beschriftet ist (im Quiz ggf. zufällig). */
+function activeRoot(): RootNote {
+  return settings.tab === 'quiz' ? quiz.activeRoot() : currentRoot();
+}
+
+function activeRootMidi(): number {
+  return KEYBOARD_LOW_MIDI + activeRoot().pitchClass;
+}
+
 function persist(): void {
   saveSettings(settings);
 }
@@ -61,7 +72,7 @@ document.addEventListener('touchstart', () => undefined, { passive: true });
 const keyboard = new Keyboard($('keyboard-scroll'), $('keyboard'), pressKey);
 
 function keyState(midi: number): KeyState {
-  const root = rootMidi();
+  const root = activeRootMidi();
   const semitones = midi - root;
   const interval = semitones >= 0 && semitones <= 12 ? intervalBySemitones(semitones) : undefined;
   if (!interval) {
@@ -73,7 +84,7 @@ function keyState(midi: number): KeyState {
       ariaLabel: `${keyLabel(midi % 12)} (Einzelton)`,
     };
   }
-  const names = intervalNames(currentRoot(), interval);
+  const names = intervalNames(activeRoot(), interval);
   return {
     inRange: true,
     isRoot: semitones === 0,
@@ -88,6 +99,10 @@ function refreshKeyboard(): void {
 }
 
 function pressKey(midi: number): void {
+  if (settings.tab === 'quiz') {
+    quiz.onKey(midi);
+    return;
+  }
   const semitones = midi - rootMidi();
   if (semitones >= 0 && semitones <= 12) {
     selectInterval(semitones);
@@ -203,9 +218,38 @@ function setRoot(name: string): void {
   keyboard.highlight([]);
   info.status.textContent = '';
   updateRoots();
+  quiz.rootChangedElsewhere();
   refreshKeyboard();
   renderInfo();
   keyboard.scrollToRange(rootMidi(), rootMidi() + 12, true);
+}
+
+// ---------- Bereiche: Lernen / Quiz ----------
+
+function updateTabs(): void {
+  for (const b of tabsEl.querySelectorAll<HTMLButtonElement>('button')) {
+    const active = b.dataset.tab === settings.tab;
+    b.setAttribute('aria-checked', String(active));
+    b.tabIndex = active ? 0 : -1;
+  }
+  app.classList.toggle('tab-learn', settings.tab === 'learn');
+  app.classList.toggle('tab-quiz', settings.tab === 'quiz');
+}
+
+function setTab(tab: Tab): void {
+  if (settings.tab === tab) return;
+  settings.tab = tab;
+  persist();
+  updateTabs();
+  if (tab === 'quiz') {
+    quiz.show();
+  } else {
+    quiz.hide();
+    keyboard.highlight(lastSemitones === null ? [] : [rootMidi(), rootMidi() + lastSemitones]);
+    renderInfo();
+  }
+  refreshKeyboard();
+  relayout();
 }
 
 /** Pfeiltasten in Radiogruppen (Bedienung mit Tastatur/Screenreader) */
@@ -244,21 +288,42 @@ againBtn.addEventListener('click', playLast);
 
 // ---------- Start ----------
 
+const quiz = new QuizController({
+  engine,
+  keyboard,
+  settings,
+  persist,
+  refreshKeyboard,
+  relayout: (smooth) => relayout(smooth),
+  onRootChosen: () => {
+    lastSemitones = null;
+    updateRoots();
+    renderInfo();
+  },
+});
+
+for (const b of tabsEl.querySelectorAll<HTMLButtonElement>('button')) {
+  b.addEventListener('click', () => setTab(b.dataset.tab as Tab));
+}
+
 renderModes();
 renderRoots();
 arrowNavigation(modesEl, (b) => setMode(b.dataset.mode as PlayMode));
 arrowNavigation(rootsEl, (b) => setRoot(b.dataset.root!));
+arrowNavigation(tabsEl, (b) => setTab(b.dataset.tab as Tab));
+updateTabs();
 updateSwitches();
+if (settings.tab === 'quiz') quiz.show();
 refreshKeyboard();
 renderInfo();
 
 function relayout(smooth = false): void {
   keyboard.layout();
-  keyboard.scrollToRange(rootMidi(), rootMidi() + 12, smooth);
+  keyboard.scrollToRange(activeRootMidi(), activeRootMidi() + 12, smooth);
 }
 relayout();
 setupAbout();
-setupInstallBanner(app, () => relayout());
+setupInstallBanner(() => relayout());
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);

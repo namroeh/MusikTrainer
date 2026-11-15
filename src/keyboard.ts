@@ -160,6 +160,11 @@ export class Keyboard {
     for (const key of this.keys) key.el.classList.toggle('lit', midis.includes(key.midi));
   }
 
+  /** Falsch angetippte Taste rot markieren (null = keine). */
+  markWrong(midi: number | null): void {
+    for (const key of this.keys) key.el.classList.toggle('wrong', key.midi === midi);
+  }
+
   /** Kurzes Aufblinken (Einzelton außerhalb des Bereichs). */
   flash(midi: number): void {
     const key = this.keys.find((k) => k.midi === midi);

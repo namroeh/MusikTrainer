@@ -1,5 +1,6 @@
 /** Info-Fenster: Installation, Bedienung, Offenlegung, Datenschutz. */
 import { ABOUT } from './about';
+import { QUIZ_RESET_EVENT, clearStats } from './quiz';
 import { SHARE_ICON, escapeHtml } from './platform';
 
 function contactHtml(contact: string): string {
@@ -25,8 +26,12 @@ function content(): string {
 <ul>
   <li>Grundton wählen – auf den Tasten bis zur Oktave sitzt je ein Symbol für das Merklied.</li>
   <li>Taste antippen: Das Intervall erklingt, darunter stehen Name, Töne und Liedtitel.</li>
-  <li>Zum Selbst-Abfragen <b>Symbole</b> und/oder <b>Liedtitel</b> ausschalten.</li>
+  <li>Zum Selbst-Abfragen <b>Symbole</b> und/oder <b>Liedtitel</b> ausschalten – oder gleich ins <b>Quiz</b> wechseln.</li>
 </ul>
+
+<h3>Quiz</h3>
+<p>Im Bereich <b>Quiz</b> spielt die App ein zufälliges Intervall. Du tippst die Zieltaste oder wählst das Intervall aus der Liste und bekommst sofort die Auflösung mit Merklied. Intervalle, die du falsch beantwortest, kommen öfter dran, bis du sie wieder sicher kannst.</p>
+<p><button type="button" class="secondary small" id="about-forget">Quiz-Lernstand zurücksetzen</button> <span class="about-done" id="about-forget-done" hidden>Erledigt.</span></p>
 
 <h3>Offenlegung</h3>
 <p>Medieninhaber: ${owner}, ${place}<br>
@@ -53,6 +58,15 @@ export function setupAbout(): void {
     body.scrollTop = 0;
   });
   close.addEventListener('click', () => dialog.close());
+  const forgetDone = document.getElementById('about-forget-done') as HTMLElement;
+  document.getElementById('about-forget')?.addEventListener('click', () => {
+    clearStats();
+    window.dispatchEvent(new Event(QUIZ_RESET_EVENT));
+    forgetDone.hidden = false;
+  });
+  dialog.addEventListener('close', () => {
+    forgetDone.hidden = true;
+  });
   // Tippen auf den abgedunkelten Hintergrund schließt ebenfalls
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) dialog.close();

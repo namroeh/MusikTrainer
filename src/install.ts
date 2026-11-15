@@ -28,7 +28,7 @@ function rememberDismissed(): void {
   }
 }
 
-export function setupInstallBanner(app: HTMLElement, onLayoutChange: () => void): void {
+export function setupInstallBanner(onLayoutChange: () => void): void {
   const banner = document.getElementById('install-banner') as HTMLElement;
   const text = document.getElementById('install-text') as HTMLElement;
   const action = document.getElementById('install-action') as HTMLButtonElement;
@@ -39,13 +39,11 @@ export function setupInstallBanner(app: HTMLElement, onLayoutChange: () => void)
     if (isStandalone() || dismissed()) return;
     text.innerHTML = html;
     banner.hidden = false;
-    app.classList.add('has-banner');
     onLayoutChange();
   };
   const hide = () => {
     if (banner.hidden) return;
     banner.hidden = true;
-    app.classList.remove('has-banner');
     onLayoutChange();
   };
 

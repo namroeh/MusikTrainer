@@ -9,6 +9,7 @@ Eine kleine Handy-App zum Lernen der Intervalle mit Merkliedern. Sie läuft komp
 - Anzeige: Kürzel, voller Name, richtig buchstabierte Tonnamen (z. B. „D – Fis", „Des – Eses (D)") und Liedtitel
 - **Nochmal**-Knopf, Schalter **Symbole** und **Liedtitel** zum Selbst-Abfragen
 - Hoch- und Querformat, helles und dunkles Design (folgt der Systemeinstellung)
+- **Quiz:** Die App spielt ein zufälliges Intervall, du tippst die Zieltaste oder wählst es aus der Liste. Grundton fest oder zufällig, Auflösung mit Merklied, Zähler. Falsch beantwortete Intervalle kommen öfter dran
 - Info-Fenster (ⓘ) mit Installationsanleitung, Offenlegung und Datenschutz; Installationshinweis im Browser
 
 **Online:** <https://namroeh.github.io/MusikTrainer/> – am Handy öffnen und „Zum Home-Bildschirm" bzw. „App installieren". Danach läuft die App offline.
@@ -115,10 +116,11 @@ Windows fragt beim ersten Start eventuell nach einer Firewall-Freigabe für Node
 npm test
 ```
 
-**Unit-Tests (Vitest, 201 Fälle):**
+**Unit-Tests (Vitest):**
 
 - Frequenzberechnung: c' = 261,63 Hz, Formel 261,63 × 2^(n/12) für alle 25 Tasten, Oktav- und Halbtonverhältnis
 - Intervalldaten: genau 13 Einträge, Halbtöne 0–12 lückenlos, Kürzel und Intervallzahl passend, Symbole ohne externe Bezüge
+- Quiz-Logik: Gewichtung (falsch beantwortete kommen öfter), keine direkte Wiederholung, Grundton fest/zufällig, gleichmäßige Verteilung ohne Lernstand
 - Tonbenennung: alle 13 Grundtöne × 13 Intervalle (Stammton-Stufe aus der Intervallzahl, Tonhöhe aus der Halbtonzahl, höchstens Doppelvorzeichen, Klammer genau bei Doppelvorzeichen), dazu die festen Prüffälle:
 
   | Intervall | Grundton | Zielton |
@@ -145,18 +147,33 @@ npm run test:e2e
 - Abgedunkelte Tasten spielen ihren Einzelton
 - „Nochmal", die Schalter, das Speichern der Auswahl und der Standard beim ersten Start
 - Tastenbreite mindestens 44 px; der Grundton-Bereich ist nach der Auswahl sichtbar
+- Quiz: richtige und falsche Antwort per Taste und per Liste, Auflösung, Zähler, Speichern des Lernstands, Grundton fest/zufällig (Symbole wandern mit), alle Wiedergabearten, Tasten außerhalb des Bereichs, Vergleichen nach der Antwort, Einstellungen bleiben erhalten
 - Installationshinweis (iPhone) und „Installieren"-Knopf (Android), Info-Fenster
 - Build im Unterordner wie auf GitHub Pages: Pfade, Manifest, Offline-Start
 - Nach dem Hintergrund (App-Wechsel) wird ein frischer AudioContext erzeugt, alte werden geschlossen und häufen sich nicht an
 - **Offline-Start** nach dem ersten Besuch, Vollständigkeit des Manifests, **keine Anfragen an fremde Server**
 
-## 7. Lieder und Symbole ändern
+## 7. Quiz
+
+Oben auf **Quiz** wechseln, dann **Start**.
+
+- **Grundton:** fest (der gewählte, wie im Lernen-Bereich) oder **zufällig**. Bei „fest" ist es derselbe Grundton wie im Lernen-Bereich: Änderst du ihn an einer Stelle, ändert er sich auch an der anderen.
+- **Antwort:** per **Taste** (Zieltaste antippen, der Grundton leuchtet) oder aus der **Liste** (r1 … r8).
+- Die **Wiedergabeart** (nacheinander / abwärts / gleichzeitig) gilt auch im Quiz.
+- **Auflösen** zeigt die Lösung, zählt aber als falsch.
+- Nach der Antwort siehst du, ob sie richtig oder falsch war, und die Auflösung mit Name, Tonnamen, Merklied und Symbol. Die richtige Taste leuchtet, eine falsch angetippte wird rot. Danach kannst du Tasten oder Listeneinträge antippen, um Intervalle zu vergleichen. Das zählt nicht mehr als Antwort.
+- **Zähler:** „Richtig: x von y" für die laufende Sitzung, mit ↺ zurücksetzen.
+- **Öfter üben, was schiefgeht:** Jedes Intervall hat einen Übungsbedarf. Eine falsche Antwort erhöht ihn um 3, eine richtige senkt ihn um 1 (Bereich 0–9). Die Ziehwahrscheinlichkeit ist proportional zu 1 + Übungsbedarf. Ein gerade falsch beantwortetes Intervall kommt also etwa dreimal so oft wie ein sicheres, bis es wieder sitzt. Dieselbe Frage kommt nie zweimal hintereinander. Der Lernstand wird am Gerät gespeichert. Zurücksetzen kannst du ihn im Quiz („Lernstand zurücksetzen") oder im Info-Fenster.
+
+Die Logik steckt in `src/quiz.ts` (getestet in `tests/quiz.test.ts`), die Oberfläche in `src/quiz-view.ts`.
+
+## 8. Lieder und Symbole ändern
 
 Alles steht in **`src/intervals.ts`**: Liedtitel (`song`), Symbolbeschreibung (`symbolName`) und das Symbol selbst (`symbol`, als SVG-Code mit Zeichenfläche 48 × 48). `semitones` und `degree` bitte nicht ändern, davon hängen Klang und Tonnamen ab. Nach einer Änderung `npm test` laufen lassen.
 
 Tipp für eigene Symbole: Inhalt innerhalb eines Kreises mit Radius ~20 um die Mitte halten. Die App legt jedes Symbol auf ein helles, rundes Plättchen mit dunklem Rand, damit es auf weißen **und** schwarzen Tasten gut lesbar ist.
 
-## 8. Ton, iOS und der Stummschalter
+## 9. Ton, iOS und der Stummschalter
 
 **Klang:** Dreieck- und Sinuswelle mit leisen Obertönen und einem Tiefpass, der sich nach dem Anschlag schließt, damit es klavierähnlich klingt. Die Lautstärke steigt in 8 ms von 0 an, klingt ab und läuft beim Loslassen weich auf 0 aus. Beim Antippen einer neuen Taste wird ein noch laufender Ton in rund 50 ms ausgeblendet. Ein Kompressor verhindert Übersteuern bei „gleichzeitig".
 
@@ -182,7 +199,7 @@ Tipp für eigene Symbole: Inhalt innerhalb eines Kreises mit Radius ~20 um die M
 
 Falls am iPhone bei Stummschaltung nichts zu hören ist: iOS-Version notieren und mir Bescheid geben. Dann bauen wir den Ausweichweg für ältere Versionen um.
 
-## 9. Projektstruktur
+## 10. Projektstruktur
 
 ```
 src/
@@ -193,6 +210,8 @@ src/
   audio.ts       ← Klangerzeugung (Web Audio), iOS-Freischaltung und -Stummschalter
   keyboard.ts    ← Tastatur: Aufbau, Größe, Scrollen, Hervorhebung
   settings.ts    ← gespeicherte Auswahl (localStorage)
+  quiz.ts        ← Quiz-Logik: Fragen, Gewichtung, Lernstand
+  quiz-view.ts   ← Quiz-Oberfläche
   about.ts       ← Angaben für Offenlegung und Datenschutz (vor dem Veröffentlichen ausfüllen)
   about-view.ts  ← Info-Fenster
   install.ts     ← Installationshinweis / „Installieren"-Knopf
@@ -214,7 +233,7 @@ public/icons/    ← App-Icons
 
 **Stimmung:** gleichstufig, c' = 261,63 Hz, Frequenz = 261,63 × 2^(Halbtöne über c' / 12). Der Grundton liegt immer zwischen c' und h', seine Oktave entsprechend zwischen c'' und h''.
 
-## 10. Bekannte Grenzen
+## 11. Bekannte Grenzen
 
 - Sehr schmale Handys (320 px, z. B. iPhone SE der 1. Generation): Weil jede Taste mindestens 44 px breit ist, passt eine ganze Oktave nicht ganz auf den Schirm. Die Tastatur lässt sich wischen.
 - Die automatischen Tests laufen in Chromium. WebKit (Safari) war in der Entwicklungsumgebung nicht verfügbar, siehe Checkliste oben.
